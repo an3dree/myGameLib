@@ -1,0 +1,22 @@
+import React, { useState } from 'react';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
+
+interface AlertModalProps {
+    open: boolean;
+    onClose: () => void;
+    message: string;
+    severity: 'success' | 'error';
+}
+
+function AlertModal({ open, onClose, message, severity }: AlertModalProps) {
+    return (
+        <Snackbar anchorOrigin={{ vertical: 'top', horizontal: 'center' }} open={open} autoHideDuration={6000} onClose={onClose}>
+            <MuiAlert onClose={onClose} severity={severity} elevation={6} variant="filled">
+                {message}
+            </MuiAlert>
+        </Snackbar>
+    );
+}
+
+export default AlertModal;
