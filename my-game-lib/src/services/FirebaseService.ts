@@ -6,10 +6,7 @@ import {
     signInWithEmailAndPassword,
     onAuthStateChanged,
     User,
-    UserProfile
 } from "firebase/auth";
-import { getAnalytics } from "firebase/analytics";
-import userEvent from "@testing-library/user-event";
 import { firebaseConfig } from "./FirebaseConfig";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -20,7 +17,6 @@ import { firebaseConfig } from "./FirebaseConfig";
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 const auth = getAuth(app);
 
 export function CreateUserWithEmailAndPassword(email: string, password: string): Promise<User | null> {

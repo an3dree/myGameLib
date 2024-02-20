@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
 import Snackbar from '@mui/material/Snackbar';
-import MuiAlert, { AlertProps } from '@mui/material/Alert';
+import MuiAlert from '@mui/material/Alert';
 
 interface AlertModalProps {
     open: boolean;

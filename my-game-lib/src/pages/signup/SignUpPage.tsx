@@ -1,5 +1,5 @@
 import React from "react";
-import { SignInWithEmailAndPassword, CreateUserWithEmailAndPassword } from "../../services/FirebaseService";
+import { CreateUserWithEmailAndPassword } from "../../services/FirebaseService";
 import { Button, IconButton, Input } from "@mui/material";
 import AlertModal from "../../components/alertModal/AlertModal";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
