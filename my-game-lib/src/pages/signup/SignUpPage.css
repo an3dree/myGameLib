@@ -1,0 +1,11 @@
+.SignUpPage {
+    text-align: center;
+}
+
+.FormWrapper {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-direction: column;
+    align-items: center;
+}

@@ -8,7 +8,7 @@ interface AlertModalProps {
     severity: 'success' | 'error';
 }
 
-function AlertModal({ open, onClose, message, severity }: AlertModalProps) {
+function CustomAlert({ open, onClose, message, severity }: AlertModalProps) {
     return (
         <Snackbar anchorOrigin={{ vertical: 'top', horizontal: 'center' }} open={open} autoHideDuration={6000} onClose={onClose}>
             <MuiAlert onClose={onClose} severity={severity} elevation={6} variant="filled">
@@ -18,4 +18,4 @@ function AlertModal({ open, onClose, message, severity }: AlertModalProps) {
     );
 }
 
-export default AlertModal;
+export default CustomAlert;

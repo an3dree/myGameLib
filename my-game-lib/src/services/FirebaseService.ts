@@ -6,8 +6,11 @@ import {
     signInWithEmailAndPassword,
     onAuthStateChanged,
     User,
+    sendEmailVerification,
+    updateProfile
 } from "firebase/auth";
 import { firebaseConfig } from "./FirebaseConfig";
+import FirebaseCustomError from "../models/FirebaseCustomError";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -19,11 +22,24 @@ import { firebaseConfig } from "./FirebaseConfig";
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-export function CreateUserWithEmailAndPassword(email: string, password: string): Promise<User | null> {
+export function CreateUserWithEmailAndPassword(email: string, password: string, displayName: string): Promise<User> {
     return createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
             const user = userCredential.user;
-            return user;
+
+            return updateProfile(user, {
+                displayName: displayName
+            }).then(() => {
+                return sendEmailVerification(user)
+                    .then(() => {
+                        return user;
+                    })
+                    .catch((e) => { console.error(e); throw e; })
+            })
+                .catch((e) => {
+                    console.error(e);
+                    throw e;
+                })
         })
         .catch((e) => {
             console.log(e.code);
@@ -33,10 +49,27 @@ export function CreateUserWithEmailAndPassword(email: string, password: string):
         });
 };
 
+export function SendEmailVerification(currentUser: User, email: string) {
+    sendEmailVerification(currentUser)
+        .then(() => {
+            console.log('email verification sent to', email);
+        })
+        .catch((e) => {
+            console.log(e.code);
+            console.log(e.message);
+            const errorMessage = getFirebaseErrorMessage(e.code);
+            throw errorMessage;
+        })
+}
+
 export function SignInWithEmailAndPassword(email: string, password: string): Promise<User | null> {
     return signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
             const user = userCredential.user;
+            if (!user.emailVerified) {
+                //const errorMessage = 'Email not verified'
+                throw new FirebaseCustomError('Email not verified', 'EMAIL_NOT_VERIFIED');
+            }
             return user;
         })
         .catch((e) => {
@@ -65,6 +98,8 @@ function getFirebaseErrorMessage(errorCode: string): string {
             return 'Invalid email';
         case 'auth/weak-password':
             return 'Password is too weak';
+        case 'EMAIL_NOT_VERIFIED':
+            return 'Email not verified';
         // Adicione outros casos conforme necessário
         default:
             return 'An error occurred while processing your request.';
