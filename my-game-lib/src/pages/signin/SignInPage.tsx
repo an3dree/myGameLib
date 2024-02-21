@@ -1,11 +1,13 @@
-import { Button, IconButton, Input } from "@mui/material";
+import { Button, FormControl, FormHelperText, IconButton, Input } from "@mui/material";
 import React from "react";
 import './SignInPage.css'
 import GoogleIcon from '@mui/icons-material/Google';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Facebook } from "@mui/icons-material";
+import { Twitter } from "@mui/icons-material";
+import { Navigate } from 'react-router-dom';
 import { SignInWithEmailAndPassword } from "../../services/FirebaseService";
 import { SignUpPage } from "../signup/SignUpPage";
-import AlertModal from "../../components/alertModal/AlertModal";
+import AlertModal from "../../components/CustomAlert/CustomAlert";
 
 interface SignInPageProps { }
 
@@ -17,6 +19,7 @@ interface SignInPageState {
     openAlert: boolean,
     alertMessage: string;
     alertSeverity: "success" | "error";
+    errors: { [key: string]: string };
 }
 
 
@@ -31,19 +34,25 @@ export default class SignInPage extends React.Component<SignInPageProps, SignInP
             alertMessage: '',
             alertSeverity: "error",
             openAlert: false,
-            isLoggedIn: false
+            isLoggedIn: false,
+            errors: {}
         }
     }
 
 
+    private handleInputChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
+        const { name, value } = event.target;
+        this.setState((prevState: SignInPageState) => ({
+            ...prevState,
+            [name]: value,
+            errors: {
+                ...prevState.errors,
+                [name]: '', // Limpar o erro ao digitar
+            },
+        }));
+    };
 
-    private handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        this.setState({ email: event.target.value });
-    }
 
-    private handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        this.setState({ password: event.target.value });
-    }
 
     private handleSignUpRedir = () => {
         this.setState({ isSignUp: true });
@@ -51,6 +60,15 @@ export default class SignInPage extends React.Component<SignInPageProps, SignInP
 
     private handleSignIn = (): void => {
         const { email, password } = this.state;
+
+        if (!email || !password) {
+            const errors: { [key: string]: string } = {};
+            if (!email) errors.email = 'Email is required'
+            if (!password) errors.password = 'Password is required'
+            this.setState({ errors });
+            return;
+        }
+
         SignInWithEmailAndPassword(email, password)
             .then(() => {
                 this.setState({ isLoggedIn: true });
@@ -60,15 +78,6 @@ export default class SignInPage extends React.Component<SignInPageProps, SignInP
             })
 
     }
-
-    private handleSuccess = (): void => {
-        const navigate = useNavigate();
-        this.setState({
-            isLoggedIn: true
-        });
-        navigate('/home');
-        console.log('sucess');
-    };
 
 
     private handleError = (errorMessage: string): void => {
@@ -85,11 +94,16 @@ export default class SignInPage extends React.Component<SignInPageProps, SignInP
         })
     }
 
+    public componentDidUpdate(prevProps: Readonly<SignInPageProps>, prevState: Readonly<SignInPageState>, snapshot?: any): void {
+        console.log(this.state)
+    }
+
 
     render(): React.ReactNode {
 
         const { email, password, isSignUp, isLoggedIn,
-            alertMessage, alertSeverity, openAlert
+            alertMessage, alertSeverity, openAlert,
+            errors
         } = this.state;
 
 
@@ -104,39 +118,78 @@ export default class SignInPage extends React.Component<SignInPageProps, SignInP
             return <Navigate to="/home" />
         } else {
             return (
-                <>
+                <div className="SignInPage">
                     <h1>My Game Lib</h1>
                     <h2>Sign In</h2>
-                    <div className='InputWrapper'>
-                        <Input
-                            value={email}
-                            placeholder="Email"
-                            onChange={this.handleEmailChange}
-                        />
-                        <Input
-                            value={password}
-                            placeholder="Password"
-                            onChange={this.handlePasswordChange}
-                            type="password"
-                        />
-                    </div>
-                    <Button
-                        variant="contained"
-                        onClick={this.handleSignIn}
-                    >
+                    <div className="SignInWrapper">
+                        <form className='InputWrapper'>
+                            <FormControl error={!!errors.email}>
+                                <Input
+                                    value={email}
+                                    required={true}
+                                    name="email"
+                                    placeholder="Email"
+                                    onChange={this.handleInputChange}
+                                />
+                                <FormHelperText>{errors.email}</FormHelperText>
+                            </FormControl>
+                            <FormControl error={!!errors.password}>
+                                <Input
+                                    value={password}
+                                    required={true}
+                                    name="password"
+                                    placeholder="Password"
+                                    onChange={this.handleInputChange}
+                                    type="password"
+                                />
+                                <FormHelperText>{errors.password}</FormHelperText>
+                            </FormControl>
 
-                        Sign in
-                    </Button>
-                    <Button
-                        color="secondary"
-                        variant="contained"
-                        onClick={this.handleSignUpRedir}
-                    >
-                        Sign up
-                    </Button>
-                    <IconButton
-                        onClick={() => { console.log('icon click') }}
-                    > <GoogleIcon /> </IconButton>
+                            <Button
+                                size="small"
+                                variant="contained"
+                                color="info"
+                                onClick={this.handleSignIn}
+                            >
+
+                                Sign in
+                            </Button>
+                        </form>
+
+                        <div className="CreateAccount">
+
+                            <span>
+                                Does not have account? Create one
+                            </span>
+                            <Button
+                                color="secondary"
+                                variant="outlined"
+                                size="small"
+                                onClick={this.handleSignUpRedir}
+                            >
+                                Sign up
+                            </Button>
+                        </div>
+
+                        <div className="SocialLogin">
+                            <span>Or try another way</span>
+                            <div className="IconsWrapper">
+                                <IconButton
+                                    onClick={() => { console.log('icon click') }}
+                                > <GoogleIcon /> </IconButton>
+                                <IconButton
+                                    onClick={() => { console.log('icon click') }}
+                                > <Twitter /> </IconButton>
+                                <IconButton
+                                    onClick={() => { console.log('icon click') }}
+                                > <Facebook /> </IconButton>
+                            </div>
+
+
+                        </div>
+                    </div>
+
+
                     <AlertModal
                         message={alertMessage}
                         severity={alertSeverity}
@@ -144,7 +197,7 @@ export default class SignInPage extends React.Component<SignInPageProps, SignInP
                         open={openAlert}
                     />
 
-                </>
+                </div>
             );
         }
 

@@ -1,20 +1,22 @@
 import React from "react";
 import { CreateUserWithEmailAndPassword } from "../../services/FirebaseService";
-import { Button, IconButton, Input } from "@mui/material";
-import AlertModal from "../../components/alertModal/AlertModal";
+import { Button, IconButton, Input, FormControl, FormHelperText } from "@mui/material";
+import AlertModal from "../../components/CustomAlert/CustomAlert";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SignInPage from "../signin/SignInPage";
+import './SignUpPage.css';
 
 interface SignUpPageProps { }
 
 interface SignUpPageState {
     email: string;
     password: string;
+    userDisplayName: string;
     openAlert: boolean;
     alertMessage: string;
     alertSeverity: "success" | "error";
     isSignIn: boolean;
-
+    errors: { [key: string]: string };
 }
 
 export class SignUpPage extends React.Component<SignUpPageProps, SignUpPageState>{
@@ -26,16 +28,38 @@ export class SignUpPage extends React.Component<SignUpPageProps, SignUpPageState
             openAlert: false,
             alertMessage: '',
             alertSeverity: "success",
-            isSignIn: false
+            isSignIn: false,
+            userDisplayName: '',
+            errors: {}
         }
     }
+
+    private handleInputChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
+        const { name, value } = event.target;
+        this.setState((prevState: SignUpPageState) => ({
+            ...prevState,
+            [name]: value,
+            errors: {
+                ...prevState.errors,
+                [name]: '', // Limpar o erro ao digitar
+            },
+        }));
+    };
+
 
     private handleSuccess = (): void => {
         this.setState({
             alertMessage: 'Account created successfully',
             alertSeverity: 'success',
-            openAlert: true
+            openAlert: true,
+            email: '',
+            password: '',
+            userDisplayName: ''
         });
+
+        setTimeout(() => {
+            this.setState({ isSignIn: true });
+        }, 3000);
     };
 
     private handleError = (errorMessage: string): void => {
@@ -58,18 +82,20 @@ export class SignUpPage extends React.Component<SignUpPageProps, SignUpPageState
         });
     };
 
-    handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        this.setState({ email: event.target.value })
-    }
 
-    handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        this.setState({ password: event.target.value })
-    }
+    private handleSignUp = (): void => {
+        const { email, password, userDisplayName } = this.state;
 
-    handleSignUp = (): void => {
-        const { email, password } = this.state;
+        if (!email || !password || !userDisplayName) {
+            const errors: { [key: string]: string } = {};
+            if (!email) errors.email = 'Email is required';
+            if (!password) errors.password = 'Password is required';
+            if (!userDisplayName) errors.userDisplayName = 'Name is required';
+            this.setState({ errors });
+            return;
+        }
 
-        CreateUserWithEmailAndPassword(email, password)
+        CreateUserWithEmailAndPassword(email, password, userDisplayName)
             .then(() => {
                 this.handleSuccess();
             })
@@ -78,10 +104,15 @@ export class SignUpPage extends React.Component<SignUpPageProps, SignUpPageState
             });
     };
 
+    public componentDidUpdate(prevProps: Readonly<SignUpPageProps>, prevState: Readonly<SignUpPageState>, snapshot?: any): void {
+        console.log(this.state)
+    }
+
     render(): React.ReactNode {
         const { email, password,
             alertMessage, alertSeverity, openAlert,
-            isSignIn
+            isSignIn, userDisplayName,
+            errors
         } = this.state;
 
         if (isSignIn) {
@@ -92,33 +123,60 @@ export class SignUpPage extends React.Component<SignUpPageProps, SignUpPageState
             );
         } else {
             return (
-                <>
+                <div className="SignUpPage">
                     <IconButton onClick={this.handleGoBack} style={{ position: 'absolute', top: 20, left: 20 }}>
                         <ArrowBackIcon />
                     </IconButton>
                     <h1>My Game Lib</h1>
                     <h2>Sign Up</h2>
-                    <div className='InputWrapper'>
-                        <Input
-                            value={email}
-                            placeholder="Email"
-                            onChange={this.handleEmailChange}
-                        />
-                        <Input
-                            value={password}
-                            placeholder="Password"
-                            onChange={this.handlePasswordChange}
-                            type="password"
-                        />
-                    </div>
-                    <Button color="secondary" variant="contained" onClick={this.handleSignUp}>Sign up</Button>
+
+                    <form action="submit" className="FormWrapper">
+                        <FormControl error={!!errors.email}>
+                            <Input
+                                name="email"
+                                value={email}
+                                placeholder="Email"
+                                onChange={this.handleInputChange}
+                                required={true}
+                            />
+                            <FormHelperText>{errors.email}</FormHelperText>
+                        </FormControl>
+
+                        <FormControl error={!!errors.password}>
+                            <Input
+                                name="password"
+                                value={password}
+                                placeholder="Password"
+                                onChange={this.handleInputChange}
+                                type="password"
+                                required={true}
+                            />
+                            <FormHelperText>{errors.password}</FormHelperText>
+                        </FormControl>
+
+                        <FormControl error={!!errors.userDisplayName}>
+                            <Input
+                                name="userDisplayName"
+                                value={userDisplayName}
+                                placeholder={'Your name'}
+                                onChange={this.handleInputChange}
+                                required={true}
+                            />
+                            <FormHelperText>{errors.userDisplayName}</FormHelperText>
+                        </FormControl>
+
+
+                        <Button color="info" variant="contained" onClick={this.handleSignUp}>Sign up</Button>
+                    </form>
+
+
                     <AlertModal
                         message={alertMessage}
                         severity={alertSeverity}
                         onClose={this.handleCloseAlert}
                         open={openAlert}
                     />
-                </>
+                </div>
             );
         }
 
