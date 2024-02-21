@@ -3,7 +3,7 @@ import { getAuth } from "firebase/auth";
 import { initializeApp } from "firebase/app";
 import { firebaseConfig } from "../../services/FirebaseConfig";
 import { useNavigate } from "react-router-dom";
-import { BottomNavigationAction, Button, IconButton } from "@mui/material";
+import { BottomNavigationAction, IconButton } from "@mui/material";
 import { BottomNavigation } from "@mui/material/"
 import './Home.css';
 import { Logout } from "@mui/icons-material";
