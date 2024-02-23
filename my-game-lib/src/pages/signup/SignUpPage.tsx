@@ -17,6 +17,7 @@ interface SignUpPageState {
     alertSeverity: "success" | "error";
     isSignIn: boolean;
     errors: { [key: string]: string };
+    age?: number;
 }
 
 export class SignUpPage extends React.Component<SignUpPageProps, SignUpPageState>{
@@ -54,7 +55,8 @@ export class SignUpPage extends React.Component<SignUpPageProps, SignUpPageState
             openAlert: true,
             email: '',
             password: '',
-            userDisplayName: ''
+            userDisplayName: '',
+            age: undefined
         });
 
         setTimeout(() => {
@@ -84,7 +86,7 @@ export class SignUpPage extends React.Component<SignUpPageProps, SignUpPageState
 
 
     private handleSignUp = (): void => {
-        const { email, password, userDisplayName } = this.state;
+        const { email, password, userDisplayName, age } = this.state;
 
         if (!email || !password || !userDisplayName) {
             const errors: { [key: string]: string } = {};
@@ -95,7 +97,7 @@ export class SignUpPage extends React.Component<SignUpPageProps, SignUpPageState
             return;
         }
 
-        CreateUserWithEmailAndPassword(email, password, userDisplayName)
+        CreateUserWithEmailAndPassword(email, password, userDisplayName, age)
             .then(() => {
                 this.handleSuccess();
             })
@@ -111,7 +113,7 @@ export class SignUpPage extends React.Component<SignUpPageProps, SignUpPageState
     render(): React.ReactNode {
         const { email, password,
             alertMessage, alertSeverity, openAlert,
-            isSignIn, userDisplayName,
+            isSignIn, userDisplayName, age,
             errors
         } = this.state;
 
@@ -163,6 +165,17 @@ export class SignUpPage extends React.Component<SignUpPageProps, SignUpPageState
                                 required={true}
                             />
                             <FormHelperText>{errors.userDisplayName}</FormHelperText>
+                        </FormControl>
+
+                        <FormControl error={!!errors.userDisplayName}>
+                            <Input
+                                type="number"
+                                name="age"
+                                value={age}
+                                placeholder={'Your age'}
+                                onChange={this.handleInputChange}
+                            />
+
                         </FormControl>
 
 
