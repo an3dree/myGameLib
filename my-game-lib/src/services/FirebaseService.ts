@@ -10,14 +10,27 @@ import {
     updateProfile
 } from "firebase/auth";
 import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
-import { firebaseConfig } from "../utils/keys";
 import { getFirestore } from "firebase/firestore";
 import FirebaseCustomError from "../utils/FirebaseCustomError";
 
+import dotenv from 'dotenv';
+dotenv.config();
+
+
+
+
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+const rawFirebaseConfig = process.env.FIREBASE_CONFIG;
+
+if (!rawFirebaseConfig) {
+    throw new Error('Firebase config not found in environment variables');
+}
+
+const FIREBASE_CONFIG = JSON.parse(rawFirebaseConfig);
+const app = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
 
 export function CreateUserWithEmailAndPassword(email: string, password: string, displayName: string, age?: number): Promise<User> {
     return createUserWithEmailAndPassword(auth, email, password)
