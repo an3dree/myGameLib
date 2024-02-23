@@ -1,48 +1,37 @@
 import { useEffect, useState } from "react";
-import { getAuth, onAuthStateChanged, User } from "firebase/auth";
-import { initializeApp } from "firebase/app";
+import { User } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { IconButton } from "@mui/material";
 import './Home.css';
 import { Logout } from "@mui/icons-material";
 import { Link } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
+import FirebaseService from "../../services/FirebaseService";
 
-// Inicialize o Firebase app
-const firebaseConfigStr = process.env.REACT_APP_FIREBASE_CONFIG;
-if (!firebaseConfigStr) {
-    console.error('Firebase config not found in environment variables');
-} else {
-    try {
-        const firebaseConfig = JSON.parse(firebaseConfigStr);
-        initializeApp(firebaseConfig);
-    } catch (error) {
-        console.error('Error parsing firebase config:', error);
-    }
+interface Props {
+    firebaseService: FirebaseService
 }
 
-const auth = getAuth(); // Obtenha a instância de autenticação do Firebase
-
-const Home: React.FC = () => {
+const Home: React.FC<Props> = ({ firebaseService }) => {
     const navigate = useNavigate();
     const [user, setUser] = useState<User | null>(null);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+        const unsubscribe = firebaseService.listenAuthState((user: User) => {
             setUser(user);
         });
 
         // Limpeza do efeito
         return () => unsubscribe();
-    }, []);
+    }, [firebaseService]);
 
     const handleLogout = () => {
-        auth.signOut()
+        firebaseService.signOut()
             .then(() => {
                 // Logout bem-sucedido, redirecionar para a página de login
                 navigate('/');
             })
-            .catch((error) => {
+            .catch((error: any) => {
                 // Tratar erros de logout, se necessário
                 console.error('Erro ao fazer logout:', error);
             });
