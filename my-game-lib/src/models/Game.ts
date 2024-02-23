@@ -1,16 +1,15 @@
-import { GameStatus } from "./GameStatus";
-import { SearchGameResult } from "./SearchGameResult";
 
-export interface Game extends SearchGameResult {
+export interface Game {
     id: number;
+    slug: string;
     name: string;
-    metacritic: number;
-    playtime: number;
-    status: GameStatus;
-    notes: string;
-    platform: string;
-    genre: string[];
-    howLongToBeat: number;
-    released: string;
+    background_image?: string;
+    metacritic?: number;
+    playtime?: number;
+    status?: string;
+    notes?: string;
+    platform?: string;
+    genre?: string[];
+    howLongToBeat?: number;
 
 }
