@@ -1,0 +1,23 @@
+.SearchPage {
+    margin: 0;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.SearchWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Courier New', Courier, monospace;
+    margin-bottom: 20px;
+}
+
+.CardsWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin: 10px 0 10px 0;
+}

@@ -5,7 +5,7 @@ export interface SearchGameResult {
     slug: string;
     name: string;
     platforms: Platform[];
-    background_image: string;
-    metacritic: number;
-    playtime: number;
+    background_image?: string;
+    metacritic?: number;
+    playtime?: number;
 }

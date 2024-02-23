@@ -9,7 +9,7 @@ import {
     sendEmailVerification,
     updateProfile
 } from "firebase/auth";
-import { addDoc, collection, getDocs } from "firebase/firestore";
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { firebaseConfig } from "../utils/keys";
 import { getFirestore } from "firebase/firestore";
 import FirebaseCustomError from "../utils/FirebaseCustomError";
@@ -58,7 +58,20 @@ export function CreateUserWithEmailAndPassword(email: string, password: string, 
 export async function AddGameToUserCollection(userId: string | undefined, game: any) {
     try {
 
+        if (!userId) {
+            throw new Error('User is not authenticated');
+        }
+
         const userGamesRef = collection(db, `Users/${userId}/Games`);
+
+        const q = query(userGamesRef, where('id', '==', game.id));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+
+            console.warn('Game already exists in user collection.');
+            throw new FirebaseCustomError('Game already exists in user collection.', 'GAME_ALREDY_EXISTS');
+        }
 
         const userGamesSnapshot = await getDocs(userGamesRef);
         if (userGamesSnapshot.empty) {
@@ -128,6 +141,8 @@ function getFirebaseErrorMessage(errorCode: string): string {
             return 'Password is too weak';
         case 'EMAIL_NOT_VERIFIED':
             return 'Email not verified';
+        case 'GAME_ALREDY_EXISTS':
+            return 'Game already exists in user collection.';
         // Adicione outros casos conforme necessário
         default:
             return 'An error occurred while processing your request.';
