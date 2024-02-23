@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getAuth } from "firebase/auth";
 import { initializeApp } from "firebase/app";
-import { firebaseConfig } from "../../utils/keys";
 import { useNavigate } from "react-router-dom";
 import { IconButton } from "@mui/material";
 import './Home.css';
@@ -10,12 +9,14 @@ import { Link } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 
 
+const firebaseConfig = JSON.parse(process.env.REACT_APP_FIREBASE_CONFIG || '');
 const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
 
 const Home: React.FC = () => {
     const navigate = useNavigate();
     const [user, setUser] = useState(auth.currentUser);
+    //const [games, setGames] = useState<Game[]>([]);
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {

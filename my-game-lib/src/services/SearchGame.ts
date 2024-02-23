@@ -1,12 +1,10 @@
 import { SearchGameResult } from "../models/SearchGameResult";
-import "path-browserify" // Import the polyfill first
-import dotenv from 'dotenv';
-import "path-browserify"
-import path from 'path'
-dotenv.config({ path: '.env' });
+
+//import dotenv from 'dotenv';
+//dotenv.config({ path: '.env' });
 
 
-const API_KEY = process.env.RAWG_API_KEY;
+const API_KEY = process.env.REACT_APP_RAWG_API_KEY;
 const BASE_URL = 'https://api.rawg.io/api';
 
 const searchGames = async (

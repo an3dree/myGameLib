@@ -1,4 +1,3 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import {
     getAuth,
@@ -13,21 +12,9 @@ import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 import { getFirestore } from "firebase/firestore";
 import FirebaseCustomError from "../utils/FirebaseCustomError";
 
-import dotenv from 'dotenv';
-dotenv.config();
 
-
-
-
-// Initialize Firebase
-const rawFirebaseConfig = process.env.FIREBASE_CONFIG;
-
-if (!rawFirebaseConfig) {
-    throw new Error('Firebase config not found in environment variables');
-}
-
-const FIREBASE_CONFIG = JSON.parse(rawFirebaseConfig);
-const app = initializeApp(FIREBASE_CONFIG);
+const firebaseConfig = JSON.parse(process.env.REACT_APP_FIREBASE_CONFIG || '');
+const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
