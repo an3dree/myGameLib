@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { getAuth } from "firebase/auth";
+import { useEffect, useState } from "react";
+import { getAuth, onAuthStateChanged, User } from "firebase/auth";
 import { initializeApp } from "firebase/app";
 import { useNavigate } from "react-router-dom";
 import { IconButton } from "@mui/material";
@@ -8,18 +8,27 @@ import { Logout } from "@mui/icons-material";
 import { Link } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 
+// Inicialize o Firebase app
+const firebaseConfigStr = process.env.REACT_APP_FIREBASE_CONFIG;
+if (!firebaseConfigStr) {
+    console.error('Firebase config not found in environment variables');
+} else {
+    try {
+        const firebaseConfig = JSON.parse(firebaseConfigStr);
+        initializeApp(firebaseConfig);
+    } catch (error) {
+        console.error('Error parsing firebase config:', error);
+    }
+}
 
-const firebaseConfig = JSON.parse(process.env.REACT_APP_FIREBASE_CONFIG || '');
-const firebaseApp = initializeApp(firebaseConfig);
-const auth = getAuth(firebaseApp);
+const auth = getAuth(); // Obtenha a instância de autenticação do Firebase
 
 const Home: React.FC = () => {
     const navigate = useNavigate();
-    const [user, setUser] = useState(auth.currentUser);
-    //const [games, setGames] = useState<Game[]>([]);
+    const [user, setUser] = useState<User | null>(null);
 
     useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
             setUser(user);
         });
 
