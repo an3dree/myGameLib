@@ -12,7 +12,6 @@ import {
 import { addDoc, collection, doc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
 import { getFirestore } from "firebase/firestore";
 import FirebaseCustomError from "../utils/FirebaseCustomError";
-import { Game } from "../models/Game";
 
 
 // const firebaseConfig = JSON.parse(process.env.REACT_APP_FIREBASE_CONFIG || '');

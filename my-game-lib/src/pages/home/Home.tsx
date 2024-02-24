@@ -40,13 +40,13 @@ const Home: React.FC<Props> = ({ firebaseService }) => {
         const getUserGames = async () => {
             if (!gameUser) return
             const userGames = await firebaseService.getUserGames(gameUser.id);
-            console.log(userGames);
+            //console.log(userGames);
             setGames(userGames);
-            console.log(games);
+            //console.log(games);
         };
         getUserGames();
 
-    }, [firebaseService, gameUser]);
+    }, [firebaseService, gameUser, games]);
 
     useEffect(() => {
         const unsubscribe = firebaseService.listenAuthState((user: User) => {

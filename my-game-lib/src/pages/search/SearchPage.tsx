@@ -52,7 +52,7 @@ const SearchPage: React.FC<Props> = ({ firebaseService }) => {
             console.log(gameUser);
         };
         getUser();
-    }, [firebaseService, user]);
+    }, [firebaseService, user, gameUser]);
 
     useEffect(() => {
         const unsubscribe = firebaseService.listenAuthState((user: User) => {
@@ -60,19 +60,19 @@ const SearchPage: React.FC<Props> = ({ firebaseService }) => {
         });
 
         return () => unsubscribe();
-    }, [firebaseService]);
+    }, [firebaseService, gameUser]);
 
-    useEffect(() => {
-        console.log(gameUser);
-    }, [gameUser]);
+    // useEffect(() => {
+    //     console.log(gameUser);
+    // }, [gameUser]);
 
-    useEffect(() => {
-        console.log(selectedPlatform);
-    }, [selectedPlatform]);
+    // useEffect(() => {
+    //     console.log(selectedPlatform);
+    // }, [selectedPlatform]);
 
-    useEffect(() => {
-        console.log(platforms);
-    }, [platforms]);
+    // useEffect(() => {
+    //     console.log(platforms);
+    // }, [platforms]);
 
     const handlePlatformChange = (event: SelectChangeEvent<Platform>) => {
         const platformName = event.target.value;
@@ -168,7 +168,7 @@ const SearchPage: React.FC<Props> = ({ firebaseService }) => {
         };
 
         addGameToCollection();
-    }, [game, user, firebaseService]);
+    }, [game, user, firebaseService, gameUser]);
 
     const onAddClick = async (selectedGame?: SearchGameResult): Promise<void> => {
         try {

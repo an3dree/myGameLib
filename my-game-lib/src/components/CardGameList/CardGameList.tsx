@@ -5,7 +5,6 @@ import metacriticIcon from '../../assets/metacritic.svg';
 import GenreTag from '../GenreTag/GenreTag';
 import { Genre } from '../../models/SearchGenreResult';
 import { Platform } from '../../models/SearchPlatformResult';
-import { useState } from 'react';
 import handlePlatformBoxColor from '../../utils/PlatformHelper';
 
 interface CardGameListProps {
@@ -16,8 +15,6 @@ interface CardGameListProps {
 }
 
 const CardGameList: React.FC<CardGameListProps> = ({ gameTitle, metaScore, genres, platform }) => {
-
-    const [platformColor, setPlatformColor] = useState();
 
 
 
