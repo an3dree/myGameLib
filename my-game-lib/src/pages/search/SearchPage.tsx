@@ -5,8 +5,7 @@ import { SearchGameResult } from '../../models/SearchGameResult';
 import CardGameResult from '../../components/CardGameResult/CardGameResult';
 import AlertModal from '../../components/CustomAlert/CustomAlert';
 import './SearchPage.css'
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { User } from 'firebase/auth';
 import FirebaseService from '../../services/FirebaseService';
 import { IconButton, Input, SelectChangeEvent } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
@@ -16,14 +15,12 @@ import AddGameModal from '../../components/AddGameModal/AddGameModal';
 import { Platform } from '../../models/SearchPlatformResult';
 import { GameStatus } from '../../models/GameStatus';
 import { useNavigate } from 'react-router-dom';
+import { GameUser } from '../../models/GameUser';
 
 interface Props {
     firebaseService: FirebaseService
 }
 
-const firebaseConfig = JSON.parse(process.env.REACT_APP_FIREBASE_CONFIG || '');
-const firebaseApp = initializeApp(firebaseConfig);
-const auth = getAuth(firebaseApp);
 
 
 
@@ -33,30 +30,61 @@ const SearchPage: React.FC<Props> = ({ firebaseService }) => {
     const [searchResults, setSearchResults] = useState<SearchGameResult[]>([]);
     const [totalResults, setTotalResults] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
-    const [user, setUser] = useState(auth.currentUser);
+    const [user, setUser] = useState<User | null>(null);
+    const [gameUser, setGameUser] = useState<GameUser>();
     const [openModal, setOpenModal] = useState(false);
     const [selectedGame, setSelectedGame] = useState<SearchGameResult>();
     const [platforms, setPlatforms] = useState<Platform[]>([]);
     const [statuses, setStatuses] = useState<GameStatus[]>([]);
     const [game, setGame] = useState<Game>();
-    const [selectedPlatform, setSelectedPlatform] = useState<string>('');
+    const [selectedPlatform, setSelectedPlatform] = useState<Platform>();
     const [selectedStatus, setSelectedStatus] = useState('');
     const [alertMessage, setAlertMessage] = useState('');
     const [openAlert, setOpenAlert] = useState(false);
     const [alertSeverity, setAlertSeverity] = useState<"success" | "error">("error");
 
     useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
+        const getUser = async () => {
+            if (!user) return;
+            const firebaseGameUser = await firebaseService.getUser(user.uid);
+            console.log(firebaseGameUser);
+            setGameUser(firebaseGameUser as any);
+            console.log(gameUser);
+        };
+        getUser();
+    }, [firebaseService, user]);
+
+    useEffect(() => {
+        const unsubscribe = firebaseService.listenAuthState((user: User) => {
             setUser(user);
         });
 
-        // Limpeza do efeito
         return () => unsubscribe();
-    }, []);
+    }, [firebaseService]);
 
-    const handlePlatformChange = (event: SelectChangeEvent) => {
-        setSelectedPlatform(event.target.value as string);
-        //console.log(selectedPlatform);
+    useEffect(() => {
+        console.log(gameUser);
+    }, [gameUser]);
+
+    useEffect(() => {
+        console.log(selectedPlatform);
+    }, [selectedPlatform]);
+
+    useEffect(() => {
+        console.log(platforms);
+    }, [platforms]);
+
+    const handlePlatformChange = (event: SelectChangeEvent<Platform>) => {
+        const platformName = event.target.value;
+
+
+        const selectedPlatform: any = platforms.find((item: any) => item.platform.name === platformName);
+
+
+        if (selectedPlatform) {
+            setSelectedPlatform(selectedPlatform.platform);
+        }
+
     }
 
     const handleStatusChange = (event: SelectChangeEvent) => {
@@ -118,7 +146,7 @@ const SearchPage: React.FC<Props> = ({ firebaseService }) => {
         const addGameToCollection = async () => {
             if (!game) return;
             try {
-                const userId = user?.uid;
+                const userId = gameUser?.id;
                 await firebaseService.addGameToUserCollection(userId, game);
 
                 setAlertSeverity("success");
@@ -128,7 +156,7 @@ const SearchPage: React.FC<Props> = ({ firebaseService }) => {
                 setSelectedGame(undefined);
 
                 setOpenModal(false);
-                setSelectedPlatform('');
+                setSelectedPlatform(undefined);
                 setSelectedStatus('');
 
 
@@ -156,12 +184,14 @@ const SearchPage: React.FC<Props> = ({ firebaseService }) => {
                 notes: '',
                 platform: selectedPlatform,
                 slug: selectedGame.slug,
-                name: selectedGame.name
+                name: selectedGame.name,
+                genres: selectedGame.genres,
+                metacritic: selectedGame.metacritic
             });
 
             //console.log(selectedGame);
             //console.log(game);
-            setSelectedPlatform('');
+            setSelectedPlatform(undefined);
             setSelectedStatus('');
 
         } catch (e) {

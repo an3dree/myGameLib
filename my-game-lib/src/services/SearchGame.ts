@@ -13,7 +13,7 @@ const searchGames = async (
     pageSize: number = 20
 ): Promise<{ results: SearchGameResult[]; totalCount: number }> => {
     try {
-        const url = `${BASE_URL}/games?key=${API_KEY}&search=${searchTerm}?order=metacritic&page=${page}&page_size=${pageSize}&search_precise=true`;
+        const url = `${BASE_URL}/games?key=${API_KEY}&search=${searchTerm}&metacritic=60,100&page=${page}&page_size=${pageSize}&search_exact=true`;
 
         const response = await fetch(url);
 

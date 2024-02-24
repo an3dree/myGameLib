@@ -9,9 +9,10 @@ import {
     updateProfile,
     signOut
 } from "firebase/auth";
-import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import { addDoc, collection, doc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
 import { getFirestore } from "firebase/firestore";
 import FirebaseCustomError from "../utils/FirebaseCustomError";
+import { Game } from "../models/Game";
 
 
 // const firebaseConfig = JSON.parse(process.env.REACT_APP_FIREBASE_CONFIG || '');
@@ -43,15 +44,32 @@ export default class FirebaseService {
                 }).then(() => {
                     return sendEmailVerification(user)
                         .then(() => {
-                            addDoc(collection(this.db, "Users"), {
-                                userId,
+                            const userDocRef = doc(collection(this.db, "Users"));
+                            const userData = {
+                                userId: userId,
                                 email,
                                 displayName,
                                 age
-                            })
-                                .then((res) => console.log(res))
-                                .catch((e) => { console.error(e); throw e; })
-                            return user;
+                            };
+
+                            return setDoc(userDocRef, userData)
+                                .then(() => {
+                                    console.log("Document successfully written!");
+                                    const generetedId = userDocRef.id;
+                                    return updateDoc(userDocRef, { id: generetedId })
+                                        .then(() => {
+                                            console.log("Document successfully updated with generated ID!");
+                                            return user;
+                                        })
+                                        .catch((e) => {
+                                            console.error("Error updating document with generated ID: ", e);
+                                            throw e;
+                                        })
+                                })
+                                .catch((error) => {
+                                    console.error("Error writing document: ", error);
+                                    throw error;
+                                });
                         })
                         .catch((e) => { console.error(e); throw e; })
                 })
@@ -68,12 +86,50 @@ export default class FirebaseService {
             });
     };
 
+    public async getUserGames(userId: string | undefined) {
+        try {
+
+
+            const userRef = collection(this.db, `Users/${userId}/Games`);
+            const q = query(userRef)
+            const querySnapshot = await getDocs(q);
+            const gamesData = querySnapshot.docs.map<any>(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            return gamesData;
+        } catch (e) {
+            console.error(e);
+            throw e;
+        }
+    }
+
+    public async getUser(userId: string | undefined) {
+        if (!userId) {
+            throw new Error('User is not authenticated');
+        }
+
+        try {
+            const userRef = collection(this.db, 'Users/');
+            const q = query(userRef, where('userId', '==', userId));
+            const querySnapshot = await getDocs(q);
+            const userData = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            console.log(userData);
+            return userData[0];
+        } catch (e) {
+            console.error(e);
+            throw e;
+        }
+
+
+    }
+
     public async addGameToUserCollection(userId: string | undefined, game: any) {
         try {
 
-            if (!userId) {
-                throw new Error('User is not authenticated');
-            }
 
             const userGamesRef = collection(this.db, `Users/${userId}/Games`);
 
@@ -86,10 +142,6 @@ export default class FirebaseService {
                 throw new FirebaseCustomError('Game already exists in user collection.', 'GAME_ALREDY_EXISTS');
             }
 
-            const userGamesSnapshot = await getDocs(userGamesRef);
-            if (userGamesSnapshot.empty) {
-                await addDoc(userGamesRef, { placeholder: true });
-            }
             await addDoc(userGamesRef, game);
 
             console.log('Game added successfully to user collection.');

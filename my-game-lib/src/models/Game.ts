@@ -1,3 +1,5 @@
+import { Genre } from "./SearchGenreResult";
+import { Platform } from "./SearchPlatformResult";
 
 export interface Game {
     id: number;
@@ -8,8 +10,8 @@ export interface Game {
     playtime?: number;
     status?: string;
     notes?: string;
-    platform?: string;
-    genre?: string[];
+    platform?: Platform;
+    genres?: Genre[];
     howLongToBeat?: number;
 
 }
