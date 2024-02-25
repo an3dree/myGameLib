@@ -7,7 +7,8 @@ import {
     User,
     sendEmailVerification,
     updateProfile,
-    signOut
+    signOut,
+    signInWithPopup, TwitterAuthProvider
 } from "firebase/auth";
 import { addDoc, collection, doc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
 import { getFirestore } from "firebase/firestore";
@@ -24,12 +25,14 @@ export default class FirebaseService {
     private auth;
     private db;
     private firebaseConfig;
+    private twitterProvider;
 
     constructor(firebaseConfig: FirebaseOptions) {
         this.firebaseConfig = JSON.parse(process.env.REACT_APP_FIREBASE_CONFIG || '');
         this.app = initializeApp(firebaseConfig);
         this.auth = getAuth(this.app);
         this.db = getFirestore(this.app);
+        this.twitterProvider = new TwitterAuthProvider();
     }
 
     public createUserWithEmailAndPassword(email: string, password: string, displayName: string, age?: number): Promise<User> {
@@ -103,6 +106,10 @@ export default class FirebaseService {
         }
     }
 
+    public async getCurrentUser() {
+        return this.auth.currentUser
+    }
+
     public async getUser(userId: string | undefined) {
         if (!userId) {
             throw new Error('User is not authenticated');
@@ -173,6 +180,61 @@ export default class FirebaseService {
                 throw errorMessage;
             })
     };
+
+    public async signInWithTwitter() {
+        return signInWithPopup(this.auth, this.twitterProvider)
+            .then((result) => {
+                const credential = TwitterAuthProvider.credentialFromResult(result);
+                //const token = credential?.accessToken;
+                //const secret = credential?.secret;
+
+                const user = result.user;
+                const userId = user.uid;
+                const email = user.email;
+                const displayName = user.displayName
+                console.log(user);
+                return updateProfile(user, {
+                    displayName: displayName,
+                    photoURL: user.photoURL
+                }).then(() => {
+                    const userDocRef = doc(collection(this.db, "Users"));
+                    const userData = {
+                        userId: userId,
+                        email,
+                        displayName
+                    };
+
+                    return setDoc(userDocRef, userData)
+                        .then(() => {
+                            const generetedId = userDocRef.id;
+                            return updateDoc(userDocRef, { id: generetedId })
+                                .then(() => {
+                                    console.log("Document successfully updated with generated ID!");
+                                    return user;
+                                })
+                                .catch((e) => {
+                                    console.error("Error updating document with generated ID: ", e);
+                                    throw e;
+                                })
+                        })
+                        .catch((error) => {
+                            console.error("Error writing document: ", error);
+                            throw error;
+                        });
+                })
+                    .catch((e) => { console.error(e); throw e; })
+                //signInWithRedirect(this.auth, this.twitterProvider);
+            })
+            .catch(e => {
+                console.log(e.code);
+                console.log(e.message);
+                const email = e.customData.email;
+                const credential = TwitterAuthProvider.credentialFromError(e);
+                console.log(email, credential);
+                const errorMessage = this.getFirebaseErrorMessage(e.code);
+                throw errorMessage;
+            })
+    }
 
     public signInWithEmailAndPassword(email: string, password: string): Promise<User | null> {
         return signInWithEmailAndPassword(this.auth, email, password)

@@ -8,6 +8,7 @@ import { Navigate } from 'react-router-dom';
 import FirebaseService from "../../services/FirebaseService";
 import { SignUpPage } from "../signup/SignUpPage";
 import AlertModal from "../../components/CustomAlert/CustomAlert";
+import { User } from "firebase/auth";
 
 interface SignInPageProps { firebaseService: FirebaseService }
 
@@ -20,6 +21,7 @@ interface SignInPageState {
     alertMessage: string;
     alertSeverity: "success" | "error";
     errors: { [key: string]: string };
+    user?: User;
 }
 
 
@@ -70,13 +72,22 @@ export default class SignInPage extends React.Component<SignInPageProps, SignInP
         }
 
         this.props.firebaseService.signInWithEmailAndPassword(email, password)
-            .then(() => {
-                this.setState({ isLoggedIn: true });
+            .then((user) => {
+                this.setState({ isLoggedIn: true, user: user as any });
             })
             .catch((e) => {
                 this.handleError(e);
             })
 
+    }
+
+    private handleTwitterSignIn = (): void => {
+        this.props.firebaseService.signInWithTwitter().then((user) => {
+            this.setState({ isLoggedIn: true, user: user as any });
+        })
+            .catch(e => {
+                this.handleError(e);
+            });
     }
 
 
@@ -92,6 +103,10 @@ export default class SignInPage extends React.Component<SignInPageProps, SignInP
         this.setState({
             openAlert: false
         })
+    }
+
+    componentDidMount(): void {
+        console.log(this.state);
     }
 
 
@@ -175,7 +190,7 @@ export default class SignInPage extends React.Component<SignInPageProps, SignInP
                                     onClick={() => { console.log('icon click') }}
                                 > <GoogleIcon /> </IconButton>
                                 <IconButton
-                                    onClick={() => { console.log('icon click') }}
+                                    onClick={this.handleTwitterSignIn}
                                 > <Twitter /> </IconButton>
                                 <IconButton
                                     onClick={() => { console.log('icon click') }}
