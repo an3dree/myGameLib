@@ -94,9 +94,6 @@ export default class SignInPage extends React.Component<SignInPageProps, SignInP
         })
     }
 
-    public componentDidUpdate(prevProps: Readonly<SignInPageProps>, prevState: Readonly<SignInPageState>, snapshot?: any): void {
-        console.log(this.state)
-    }
 
 
     render(): React.ReactNode {
