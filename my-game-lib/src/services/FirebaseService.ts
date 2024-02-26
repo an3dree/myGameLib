@@ -1,4 +1,3 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import {
     getAuth,
@@ -10,14 +9,15 @@ import {
     updateProfile
 } from "firebase/auth";
 import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
-import { firebaseConfig } from "../utils/keys";
 import { getFirestore } from "firebase/firestore";
 import FirebaseCustomError from "../utils/FirebaseCustomError";
 
-// Initialize Firebase
+
+const firebaseConfig = JSON.parse(process.env.REACT_APP_FIREBASE_CONFIG || '');
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
 
 export function CreateUserWithEmailAndPassword(email: string, password: string, displayName: string, age?: number): Promise<User> {
     return createUserWithEmailAndPassword(auth, email, password)

@@ -7,7 +7,6 @@ import AlertModal from '../../components/CustomAlert/CustomAlert';
 import './SearchPage.css'
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { firebaseConfig } from '../../utils/keys';
 import { AddGameToUserCollection } from '../../services/FirebaseService';
 import { IconButton, Input, SelectChangeEvent } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
@@ -18,6 +17,7 @@ import { Platform } from '../../models/SearchPlatformResult';
 import { GameStatus } from '../../models/GameStatus';
 import { useNavigate } from 'react-router-dom';
 
+const firebaseConfig = JSON.parse(process.env.REACT_APP_FIREBASE_CONFIG || '');
 const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
 
