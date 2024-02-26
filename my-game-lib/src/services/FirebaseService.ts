@@ -1,4 +1,3 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import {
     getAuth,
@@ -9,29 +8,36 @@ import {
     sendEmailVerification,
     updateProfile
 } from "firebase/auth";
-import { firebaseConfig } from "./FirebaseConfig";
-import FirebaseCustomError from "../models/FirebaseCustomError";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
+import FirebaseCustomError from "../utils/FirebaseCustomError";
 
 
-// Initialize Firebase
+const firebaseConfig = JSON.parse(process.env.REACT_APP_FIREBASE_CONFIG || '');
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
-export function CreateUserWithEmailAndPassword(email: string, password: string, displayName: string): Promise<User> {
+
+export function CreateUserWithEmailAndPassword(email: string, password: string, displayName: string, age?: number): Promise<User> {
     return createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
             const user = userCredential.user;
+            const userId = user.uid;
 
             return updateProfile(user, {
-                displayName: displayName
+                displayName: displayName,
             }).then(() => {
                 return sendEmailVerification(user)
                     .then(() => {
+                        addDoc(collection(db, "Users"), {
+                            userId,
+                            email,
+                            displayName,
+                            age
+                        })
+                            .then((res) => console.log(res))
+                            .catch((e) => { console.error(e); throw e; })
                         return user;
                     })
                     .catch((e) => { console.error(e); throw e; })
@@ -48,6 +54,41 @@ export function CreateUserWithEmailAndPassword(email: string, password: string, 
             throw errorMessage;
         });
 };
+
+export async function AddGameToUserCollection(userId: string | undefined, game: any) {
+    try {
+
+        if (!userId) {
+            throw new Error('User is not authenticated');
+        }
+
+        const userGamesRef = collection(db, `Users/${userId}/Games`);
+
+        const q = query(userGamesRef, where('id', '==', game.id));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+
+            console.warn('Game already exists in user collection.');
+            throw new FirebaseCustomError('Game already exists in user collection.', 'GAME_ALREDY_EXISTS');
+        }
+
+        const userGamesSnapshot = await getDocs(userGamesRef);
+        if (userGamesSnapshot.empty) {
+            await addDoc(userGamesRef, { placeholder: true });
+        }
+        await addDoc(userGamesRef, game);
+
+        console.log('Game added successfully to user collection.');
+
+
+    } catch (e) {
+        console.error('Error adding game to user collection:', e);
+        throw e;
+    }
+}
+
+
 
 export function SendEmailVerification(currentUser: User, email: string) {
     sendEmailVerification(currentUser)
@@ -100,6 +141,8 @@ function getFirebaseErrorMessage(errorCode: string): string {
             return 'Password is too weak';
         case 'EMAIL_NOT_VERIFIED':
             return 'Email not verified';
+        case 'GAME_ALREDY_EXISTS':
+            return 'Game already exists in user collection.';
         // Adicione outros casos conforme necessário
         default:
             return 'An error occurred while processing your request.';

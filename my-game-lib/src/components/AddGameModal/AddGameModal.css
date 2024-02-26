@@ -1,0 +1,17 @@
+.AddGameModal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ModalBox {
+    background-color: '#FFF';
+    border-radius: 8px;
+    outline: none;
+    box-shadow: 24;
+    padding: 24px;
+    max-width: 80%;
+    max-height: 80%;
+    overflow: auto;
+    position: relative;
+}
