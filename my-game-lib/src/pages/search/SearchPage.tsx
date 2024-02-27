@@ -140,7 +140,7 @@ const SearchPage: React.FC<Props> = ({ firebaseService }) => {
         };
 
         addGameToCollection();
-    }, [game, user]);
+    }, [game, user, firebaseService]);
 
     const onAddClick = async (selectedGame?: SearchGameResult): Promise<void> => {
         try {
