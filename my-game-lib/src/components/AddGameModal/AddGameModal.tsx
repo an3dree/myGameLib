@@ -24,13 +24,13 @@ const AddGameModal = (
         {
             open: boolean,
             handleClose: () => void,
-            handlePlatformChange: (event: SelectChangeEvent) => void,
+            handlePlatformChange: (event: SelectChangeEvent<any>) => void,
             handleStatusChange: (event: SelectChangeEvent) => void,
             addGame: () => Promise<void>,
             game?: SearchGameResult | null,
             platforms: Platform[];
             statuses: GameStatus[];
-            platform: string;
+            platform?: Platform;
             status: string;
         }
 ) => {
@@ -81,7 +81,7 @@ const AddGameModal = (
                         <Select
                             labelId="platform"
                             id="platform-select"
-                            value={platform}
+                            value={platform ? platform.name : ''}
                             label="Platform"
                             onChange={handlePlatformChange}
                         >

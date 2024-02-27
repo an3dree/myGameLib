@@ -1,3 +1,4 @@
+import { Genre } from "./SearchGenreResult";
 import { Platform } from "./SearchPlatformResult";
 
 export interface SearchGameResult {
@@ -8,4 +9,5 @@ export interface SearchGameResult {
     background_image?: string;
     metacritic?: number;
     playtime?: number;
+    genres?: Genre[];
 }

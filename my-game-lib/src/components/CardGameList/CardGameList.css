@@ -1,0 +1,43 @@
+.CardGameList {
+    width: 345px;
+    border: 2px;
+    border-radius: 10px;
+    border-color: slategray;
+    border-style: solid;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.GameTitle {
+    color: slategray;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.BottomWrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    align-content: center;
+    justify-content: space-between;
+}
+
+.Metacritic {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+    margin: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: '#001B36';
+}
+
+.Genres {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    margin: 8px;
+}
