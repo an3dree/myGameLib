@@ -5,11 +5,11 @@ import GoogleIcon from '@mui/icons-material/Google';
 import { Facebook } from "@mui/icons-material";
 import { Twitter } from "@mui/icons-material";
 import { Navigate } from 'react-router-dom';
-import { SignInWithEmailAndPassword } from "../../services/FirebaseService";
+import FirebaseService from "../../services/FirebaseService";
 import { SignUpPage } from "../signup/SignUpPage";
 import AlertModal from "../../components/CustomAlert/CustomAlert";
 
-interface SignInPageProps { }
+interface SignInPageProps { firebaseService: FirebaseService }
 
 interface SignInPageState {
     email: string;
@@ -69,7 +69,7 @@ export default class SignInPage extends React.Component<SignInPageProps, SignInP
             return;
         }
 
-        SignInWithEmailAndPassword(email, password)
+        this.props.firebaseService.signInWithEmailAndPassword(email, password)
             .then(() => {
                 this.setState({ isLoggedIn: true });
             })
@@ -108,7 +108,7 @@ export default class SignInPage extends React.Component<SignInPageProps, SignInP
         if (isSignUp) {
             return (
                 <>
-                    <SignUpPage />
+                    <SignUpPage firebaseService={this.props.firebaseService} />
                 </>
             );
         } else if (isLoggedIn) {

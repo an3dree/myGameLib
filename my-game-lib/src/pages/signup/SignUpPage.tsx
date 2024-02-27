@@ -1,12 +1,12 @@
 import React from "react";
-import { CreateUserWithEmailAndPassword } from "../../services/FirebaseService";
+import FirebaseService from "../../services/FirebaseService";
 import { Button, IconButton, Input, FormControl, FormHelperText } from "@mui/material";
 import AlertModal from "../../components/CustomAlert/CustomAlert";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SignInPage from "../signin/SignInPage";
 import './SignUpPage.css';
 
-interface SignUpPageProps { }
+interface SignUpPageProps { firebaseService: FirebaseService }
 
 interface SignUpPageState {
     email: string;
@@ -97,7 +97,7 @@ export class SignUpPage extends React.Component<SignUpPageProps, SignUpPageState
             return;
         }
 
-        CreateUserWithEmailAndPassword(email, password, userDisplayName, age)
+        this.props.firebaseService.createUserWithEmailAndPassword(email, password, userDisplayName, age)
             .then(() => {
                 this.handleSuccess();
             })
@@ -106,9 +106,9 @@ export class SignUpPage extends React.Component<SignUpPageProps, SignUpPageState
             });
     };
 
-    public componentDidUpdate(prevProps: Readonly<SignUpPageProps>, prevState: Readonly<SignUpPageState>, snapshot?: any): void {
-        console.log(this.state)
-    }
+    // public componentDidUpdate(prevProps: Readonly<SignUpPageProps>, prevState: Readonly<SignUpPageState>, snapshot?: any): void {
+    //     console.log(this.state)
+    // }
 
     render(): React.ReactNode {
         const { email, password,
@@ -120,7 +120,7 @@ export class SignUpPage extends React.Component<SignUpPageProps, SignUpPageState
         if (isSignIn) {
             return (
                 <>
-                    <SignInPage />
+                    <SignInPage firebaseService={this.props.firebaseService} />
                 </>
             );
         } else {
