@@ -19,43 +19,40 @@ const Home: React.FC<Props> = ({ firebaseService }) => {
     const navigate = useNavigate();
     const [user, setUser] = useState<User | null>(null);
     const [games, setGames] = useState<Game[]>([]);
+    // eslint-disable-next-line
     const [gameUser, setGameUser] = useState<GameUser>();
 
     useEffect(() => {
-        const getUser = async () => {
+        const fetchData = async () => {
+
             if (!user) return;
+
+            // Atualizar o estado do usuário
+            setUser(user);
+
+            // Obter informações do usuário
             const firebaseGameUser = await firebaseService.getUser(user.uid);
-            console.log(firebaseGameUser);
             setGameUser(firebaseGameUser as any);
 
+            // Obter jogos do usuário
+            if (firebaseGameUser) {
+                const userGames = await firebaseService.getUserGames(firebaseGameUser.id);
+                setGames(userGames);
+            }
         };
-        getUser();
-    }, [firebaseService, user]);
 
-    useEffect(() => {
-        console.log(gameUser);
-    }, [gameUser]);
-
-    useEffect(() => {
-        const getUserGames = async () => {
-            if (!gameUser) return
-            const userGames = await firebaseService.getUserGames(gameUser.id);
-            //console.log(userGames);
-            setGames(userGames);
-            //console.log(games);
-        };
-        getUserGames();
-
-    }, [firebaseService, gameUser, games]);
-
-    useEffect(() => {
+        // Lidar com mudanças no estado de autenticação
         const unsubscribe = firebaseService.listenAuthState((user: User) => {
             setUser(user);
         });
 
+        // Executar fetchData ao montar o componente ou quando o usuário mudar
+        fetchData();
 
+        // Limpar o listener de autenticação ao desmontar o componente
         return () => unsubscribe();
-    }, [firebaseService]);
+    }, [firebaseService, user]);
+
 
     const handleLogout = () => {
         firebaseService.signOut()
@@ -77,14 +74,14 @@ const Home: React.FC<Props> = ({ firebaseService }) => {
             <h1>My Game Lib</h1>
             <div className="GamesWrapper">
                 {games.length > 0 &&
-                    games.map(game => {
+                    games.map((game, i) => {
 
                         return (
                             <CardGameList
                                 gameTitle={game.name}
                                 genres={game.genres}
                                 metaScore={game.metacritic}
-                                key={game.id}
+                                key={`${game.id}-${i}`}
                                 platform={game.platform}
                             />
                         );

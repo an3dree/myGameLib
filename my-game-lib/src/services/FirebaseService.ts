@@ -7,7 +7,8 @@ import {
     User,
     sendEmailVerification,
     updateProfile,
-    signOut
+    signOut,
+    signInWithPopup, TwitterAuthProvider, FacebookAuthProvider, GoogleAuthProvider
 } from "firebase/auth";
 import { addDoc, collection, doc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
 import { getFirestore } from "firebase/firestore";
@@ -24,12 +25,18 @@ export default class FirebaseService {
     private auth;
     private db;
     private firebaseConfig;
+    private twitterProvider;
+    private facebookProvider;
+    private googleProvider;
 
     constructor(firebaseConfig: FirebaseOptions) {
         this.firebaseConfig = JSON.parse(process.env.REACT_APP_FIREBASE_CONFIG || '');
         this.app = initializeApp(firebaseConfig);
         this.auth = getAuth(this.app);
         this.db = getFirestore(this.app);
+        this.twitterProvider = new TwitterAuthProvider();
+        this.facebookProvider = new FacebookAuthProvider();
+        this.googleProvider = new GoogleAuthProvider();
     }
 
     public createUserWithEmailAndPassword(email: string, password: string, displayName: string, age?: number): Promise<User> {
@@ -37,6 +44,7 @@ export default class FirebaseService {
             .then((userCredential) => {
                 const user = userCredential.user;
                 const userId = user.uid;
+                const signInMethod = 'emailpwd'
 
                 return updateProfile(user, {
                     displayName: displayName,
@@ -48,16 +56,17 @@ export default class FirebaseService {
                                 userId: userId,
                                 email,
                                 displayName,
-                                age
+                                age,
+                                signInMethod: signInMethod
                             };
 
                             return setDoc(userDocRef, userData)
                                 .then(() => {
-                                    console.log("Document successfully written!");
+                                    //console.log("Document successfully written!");
                                     const generetedId = userDocRef.id;
                                     return updateDoc(userDocRef, { id: generetedId })
                                         .then(() => {
-                                            console.log("Document successfully updated with generated ID!");
+                                            //console.log("Document successfully updated with generated ID!");
                                             return user;
                                         })
                                         .catch((e) => {
@@ -103,6 +112,10 @@ export default class FirebaseService {
         }
     }
 
+    public async getCurrentUser() {
+        return this.auth.currentUser
+    }
+
     public async getUser(userId: string | undefined) {
         if (!userId) {
             throw new Error('User is not authenticated');
@@ -116,7 +129,7 @@ export default class FirebaseService {
                 id: doc.id,
                 ...doc.data()
             }));
-            console.log(userData);
+            //console.log(userData);
             return userData[0];
         } catch (e) {
             console.error(e);
@@ -143,7 +156,7 @@ export default class FirebaseService {
 
             await addDoc(userGamesRef, game);
 
-            console.log('Game added successfully to user collection.');
+            //console.log('Game added successfully to user collection.');
 
 
         } catch (e) {
@@ -164,7 +177,7 @@ export default class FirebaseService {
     public emailVerification(currentUser: User, email: string) {
         sendEmailVerification(currentUser)
             .then(() => {
-                console.log('email verification sent to', email);
+                //console.log('email verification sent to', email);
             })
             .catch((e) => {
                 console.log(e.code);
@@ -173,6 +186,162 @@ export default class FirebaseService {
                 throw errorMessage;
             })
     };
+
+    public async signInWithGoogle() {
+        return signInWithPopup(this.auth, this.googleProvider)
+            .then((result) => {
+                const credential = GoogleAuthProvider.credentialFromResult(result);
+                //const token = credential?.accessToken;
+                // The signed-in user info.
+                const signInMethod = 'google';
+                const user = result.user;
+                const userId = user.uid;
+                const email = user.email;
+                const displayName = user.displayName;
+
+                return updateProfile(user, {
+                    displayName: displayName,
+                    photoURL: user.photoURL
+                }).then(async () => {
+                    const userDocRef = doc(collection(this.db, "Users"));
+                    const userData = {
+                        userId: userId,
+                        email,
+                        displayName,
+                        signInMethod
+                    };
+
+                    const userRef = collection(this.db, "Users");
+                    const q = query(userRef, where("userId", "==", `${userData.userId}`));
+                    const querySnapshot = await getDocs(q);
+
+                    if (!querySnapshot.empty) {
+                        console.warn('User alredy exist in collection.');
+                        return;
+                    }
+
+                    return setDoc(userDocRef, userData)
+                        .then(() => {
+                            const generetedId = userDocRef.id;
+                            return updateDoc(userDocRef, { id: generetedId })
+                                .then(() => {
+                                    //console.log("Document successfully updated");
+                                    return user;
+                                })
+                                .catch((e) => {
+                                    //console.error("Error updating document with generated ID: ", e);
+                                    throw e;
+                                })
+                        })
+                        .catch((e) => {
+                            //console.error("Error writing document: ", e);
+                            throw e;
+                        })
+
+                }).catch((e) => { console.error(e); throw e; })
+
+
+            }).catch((error) => {
+
+                const errorCode = error.code;
+                const errorMessage1 = error.message;
+
+                const email = error.customData.email;
+
+                const credential = GoogleAuthProvider.credentialFromError(error)
+                //console.log(errorCode, errorMessage1, email, credential)
+                const errorMessage = this.getFirebaseErrorMessage(error.code);
+                throw errorMessage;
+            })
+    }
+
+    // public async signInWithFacebook() {
+    //     return signInWithPopup(this.auth, this.facebookProvider)
+    //         .then((result) => {
+    //             const user = result.user;
+
+    //             const credential = FacebookAuthProvider.credentialFromResult(result);
+    //             const accessToken = credential?.accessToken;
+    //             console.log(user, credential, accessToken);
+    //         })
+    //         .catch(e => {
+    //             const errorCode = e.code;
+    //             const errorMessage1 = e.message;
+    //             // The email of the user's account used.
+    //             const email = e.customData.email;
+    //             // The AuthCredential type that was used.
+    //             const credential = FacebookAuthProvider.credentialFromError(e);
+    //             console.error(errorMessage1, email, credential);
+    //             const errorMessage = this.getFirebaseErrorMessage(e.code);
+    //             throw errorMessage;
+    //         })
+    // }
+
+    public async signInWithTwitter() {
+        return signInWithPopup(this.auth, this.twitterProvider)
+            .then((result) => {
+                const credential = TwitterAuthProvider.credentialFromResult(result);
+                //const token = credential?.accessToken;
+                //const secret = credential?.secret;
+                const signInMethod = 'twitter';
+                const user = result.user;
+                const userId = user.uid;
+                const email = user.email;
+                const displayName = user.displayName
+                //console.log(user);
+                return updateProfile(user, {
+                    displayName: displayName,
+                    photoURL: user.photoURL
+                }).then(async () => {
+                    const userDocRef = doc(collection(this.db, "Users"));
+                    const userData = {
+                        userId: userId,
+                        email,
+                        displayName,
+                        signInMethod: signInMethod
+                    };
+
+                    const userRef = collection(this.db, `Users/`);
+                    const q = query(userRef, where('userId', '==', `${userData.userId}`));
+                    const querySnapshot = await getDocs(q)
+
+                    if (!querySnapshot.empty) {
+                        console.warn('User alredy exist in collection.');
+                        return;
+                    }
+
+
+                    return setDoc(userDocRef, userData)
+                        .then(() => {
+                            const generetedId = userDocRef.id;
+                            return updateDoc(userDocRef, { id: generetedId })
+                                .then(() => {
+                                    //console.log("Document successfully updated with generated ID!");
+                                    return user;
+                                })
+                                .catch((e) => {
+                                    //console.error("Error updating document with generated ID: ", e);
+                                    throw e;
+                                })
+                        })
+                        .catch((error) => {
+                            console.error("Error writing document: ", error);
+                            throw error;
+                        });
+                })
+                    .catch((e) => { console.error(e); throw e; })
+                //signInWithRedirect(this.auth, this.twitterProvider);
+            })
+            .catch(e => {
+                console.log(e.code);
+                console.log(e.message);
+                const email = e.customData.email;
+                const credential = TwitterAuthProvider.credentialFromError(e);
+                console.log(email, credential);
+                const errorMessage = this.getFirebaseErrorMessage(e.code);
+                throw errorMessage;
+            })
+    }
 
     public signInWithEmailAndPassword(email: string, password: string): Promise<User | null> {
         return signInWithEmailAndPassword(this.auth, email, password)

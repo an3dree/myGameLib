@@ -44,35 +44,31 @@ const SearchPage: React.FC<Props> = ({ firebaseService }) => {
     const [alertSeverity, setAlertSeverity] = useState<"success" | "error">("error");
 
     useEffect(() => {
-        const getUser = async () => {
-            if (!user) return;
-            const firebaseGameUser = await firebaseService.getUser(user.uid);
-            console.log(firebaseGameUser);
-            setGameUser(firebaseGameUser as any);
-            console.log(gameUser);
-        };
-        getUser();
-    }, [firebaseService, user, gameUser]);
+        const fetchData = async () => {
+            try {
+                const currentUser = await firebaseService.getCurrentUser();
+                setUser(currentUser);
 
-    useEffect(() => {
-        const unsubscribe = firebaseService.listenAuthState((user: User) => {
-            setUser(user);
+                if (currentUser) {
+                    //console.log(currentUser);
+                    const firebaseGameUser = await firebaseService.getUser(currentUser.uid);
+                    setGameUser(firebaseGameUser as any);
+                }
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+            }
+        };
+
+        const unsubscribe = firebaseService.listenAuthState((currentUser: User | null) => {
+            setUser(currentUser);
         });
 
+        fetchData();
+
         return () => unsubscribe();
-    }, [firebaseService, gameUser]);
+    }, [firebaseService]);
 
-    // useEffect(() => {
-    //     console.log(gameUser);
-    // }, [gameUser]);
 
-    // useEffect(() => {
-    //     console.log(selectedPlatform);
-    // }, [selectedPlatform]);
-
-    // useEffect(() => {
-    //     console.log(platforms);
-    // }, [platforms]);
 
     const handlePlatformChange = (event: SelectChangeEvent<Platform>) => {
         const platformName = event.target.value;
