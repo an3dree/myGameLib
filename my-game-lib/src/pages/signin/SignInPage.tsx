@@ -26,7 +26,7 @@ interface SignInPageState {
 
 
 
-export default class SignInPage extends React.Component<SignInPageProps, SignInPageState>{
+export default class SignInPage extends React.Component<SignInPageProps, SignInPageState> {
     constructor(props: SignInPageProps) {
         super(props);
         this.state = {
@@ -90,6 +90,22 @@ export default class SignInPage extends React.Component<SignInPageProps, SignInP
             });
     }
 
+    private handleGoogleSignIn = (): void => {
+        this.props.firebaseService.signInWithGoogle().then((user) => {
+            this.setState({ isLoggedIn: true, user: user as any });
+        }).catch(e => {
+            this.handleError(e);
+        });
+    }
+    // private handleFacebookSignIn = (): void => {
+    //     this.props.firebaseService.signInWithFacebook().then((user) => {
+    //         this.setState({ isLoggedIn: true, user: user as any });
+    //     })
+    //         .catch(e => {
+    //             this.handleError(e);
+    //         });
+    // }
+
 
     private handleError = (errorMessage: string): void => {
         this.setState({
@@ -105,9 +121,9 @@ export default class SignInPage extends React.Component<SignInPageProps, SignInP
         })
     }
 
-    componentDidMount(): void {
-        console.log(this.state);
-    }
+    // componentDidMount(): void {
+    //     console.log(this.state);
+    // }
 
 
 
@@ -187,14 +203,17 @@ export default class SignInPage extends React.Component<SignInPageProps, SignInP
                             <span>Or try another way</span>
                             <div className="IconsWrapper">
                                 <IconButton
-                                    onClick={() => { console.log('icon click') }}
+                                    onClick={this.handleGoogleSignIn}
                                 > <GoogleIcon /> </IconButton>
                                 <IconButton
                                     onClick={this.handleTwitterSignIn}
                                 > <Twitter /> </IconButton>
+                                {/*
                                 <IconButton
-                                    onClick={() => { console.log('icon click') }}
+                                    onClick={this.handleFacebookSignIn}
                                 > <Facebook /> </IconButton>
+                                */}
+
                             </div>
 
 

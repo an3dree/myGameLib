@@ -24,6 +24,7 @@ const Home: React.FC<Props> = ({ firebaseService }) => {
 
     useEffect(() => {
         const fetchData = async () => {
+
             if (!user) return;
 
             // Atualizar o estado do usuário
