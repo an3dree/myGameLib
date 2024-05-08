@@ -190,7 +190,8 @@ export default class FirebaseService {
     public async signInWithGoogle() {
         return signInWithPopup(this.auth, this.googleProvider)
             .then((result) => {
-                const credential = GoogleAuthProvider.credentialFromResult(result);
+                //const credential = GoogleAuthProvider.credentialFromResult(result);
+
                 //const token = credential?.accessToken;
                 // The signed-in user info.
                 const signInMethod = 'google';
@@ -244,13 +245,13 @@ export default class FirebaseService {
             }).catch((error) => {
 
                 const errorCode = error.code;
-                const errorMessage1 = error.message;
+                //const errorMessage1 = error.message;
 
-                const email = error.customData.email;
+                //const email = error.customData.email;
 
-                const credential = GoogleAuthProvider.credentialFromError(error)
+                //const credential = GoogleAuthProvider.credentialFromError(error)
                 //console.log(errorCode, errorMessage1, email, credential)
-                const errorMessage = this.getFirebaseErrorMessage(error.code);
+                const errorMessage = this.getFirebaseErrorMessage(errorCode);
                 throw errorMessage;
             })
     }
@@ -280,7 +281,7 @@ export default class FirebaseService {
     public async signInWithTwitter() {
         return signInWithPopup(this.auth, this.twitterProvider)
             .then((result) => {
-                const credential = TwitterAuthProvider.credentialFromResult(result);
+                //const credential = TwitterAuthProvider.credentialFromResult(result);
                 //const token = credential?.accessToken;
                 //const secret = credential?.secret;
                 const signInMethod = 'twitter';
