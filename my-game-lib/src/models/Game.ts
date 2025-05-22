@@ -1,3 +1,4 @@
+import { GameStatus } from "./GameStatus";
 import { Genre } from "./SearchGenreResult";
 import { Platform } from "./SearchPlatformResult";
 
@@ -8,7 +9,7 @@ export interface Game {
     background_image?: string;
     metacritic?: number;
     playtime?: number;
-    status?: string;
+    status?: GameStatus;
     notes?: string;
     platform?: Platform;
     genres?: Genre[];
