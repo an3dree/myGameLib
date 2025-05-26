@@ -184,6 +184,7 @@ const Home: React.FC<Props> = ({ firebaseService }) => {
                                     gameStatus={game.status?.slug}
                                     gameId={game.id}
                                     editGame={handleEditGame}
+                                    playedTime={game.playedTime}
                                 />
                             </motion.div>
                         ))
