@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Select, MenuItem } from '@mui/material';
 import { Game } from '../../models/Game';
 import { GameStatus } from '../../models/GameStatus';
-import { Platform } from '../../models/SearchPlatformResult';
 
 interface EditGameModalProps {
     open: boolean;

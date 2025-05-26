@@ -1,6 +1,5 @@
 import * as React from 'react';
 import './CardGameList.css';
-import PlatformTag from '../PlatformTag/PlatformTag';
 import metacriticIcon from '../../assets/metacritic.svg';
 import pcIcon from '../../assets/steam.svg';
 import psIcon from '../../assets/playstation.svg';
@@ -9,7 +8,6 @@ import nintendoIcon from '../../assets/nintendo-switch.svg';
 import GenreTag from '../GenreTag/GenreTag';
 import { Genre } from '../../models/SearchGenreResult';
 import { Platform } from '../../models/SearchPlatformResult';
-import handlePlatformBoxColor from '../../utils/PlatformHelper';
 import { Tooltip } from '@mui/material';
 
 interface CardGameListProps {
