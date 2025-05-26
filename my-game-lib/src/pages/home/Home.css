@@ -3,8 +3,13 @@
 }
 
 .GamesWrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    max-width: 100%;
+    gap: 16px;
+    justify-items: start;
+    justify-content: start;
+    align-items: start;
+    width: 100%;
+    padding: 16px 16px;
 }

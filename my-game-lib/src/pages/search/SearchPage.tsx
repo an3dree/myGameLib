@@ -38,7 +38,7 @@ const SearchPage: React.FC<Props> = ({ firebaseService }) => {
     const [statuses, setStatuses] = useState<GameStatus[]>([]);
     const [game, setGame] = useState<Game>();
     const [selectedPlatform, setSelectedPlatform] = useState<Platform>();
-    const [selectedStatus, setSelectedStatus] = useState('');
+    const [selectedStatus, setSelectedStatus] = useState<GameStatus>();
     const [alertMessage, setAlertMessage] = useState('');
     const [openAlert, setOpenAlert] = useState(false);
     const [alertSeverity, setAlertSeverity] = useState<"success" | "error">("error");
@@ -83,8 +83,17 @@ const SearchPage: React.FC<Props> = ({ firebaseService }) => {
 
     }
 
-    const handleStatusChange = (event: SelectChangeEvent) => {
-        setSelectedStatus(event.target.value as string);
+    const handleStatusChange = (event: SelectChangeEvent<GameStatus>) => {
+        const statusName = event.target.value;
+
+        const selectedStatus: any = statuses.find((item: any) => item.name === statusName);
+        console.log(statusName);
+        if (selectedStatus) {
+            setSelectedStatus(selectedStatus);
+            console.log(selectedStatus);
+        }
+
+
     }
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -153,7 +162,7 @@ const SearchPage: React.FC<Props> = ({ firebaseService }) => {
 
                 setOpenModal(false);
                 setSelectedPlatform(undefined);
-                setSelectedStatus('');
+                setSelectedStatus(undefined);
 
 
 
@@ -188,7 +197,7 @@ const SearchPage: React.FC<Props> = ({ firebaseService }) => {
             //console.log(selectedGame);
             //console.log(game);
             setSelectedPlatform(undefined);
-            setSelectedStatus('');
+            setSelectedStatus(undefined);
 
         } catch (e) {
             setOpenAlert(true);

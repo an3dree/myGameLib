@@ -25,13 +25,13 @@ const AddGameModal = (
             open: boolean,
             handleClose: () => void,
             handlePlatformChange: (event: SelectChangeEvent<any>) => void,
-            handleStatusChange: (event: SelectChangeEvent) => void,
+            handleStatusChange: (event: SelectChangeEvent<any>) => void,
             addGame: () => Promise<void>,
             game?: SearchGameResult | null,
             platforms: Platform[];
             statuses: GameStatus[];
             platform?: Platform;
-            status: string;
+            status?: GameStatus;
         }
 ) => {
 
@@ -97,13 +97,12 @@ const AddGameModal = (
                         </Select>
                     </FormControl>
 
-
                     <FormControl fullWidth>
                         <InputLabel id="status">Status</InputLabel>
                         <Select
                             labelId="status"
                             id="status-select"
-                            value={status}
+                            value={status ? status.name : ''}
                             label="Status"
                             onChange={handleStatusChange}
                         >

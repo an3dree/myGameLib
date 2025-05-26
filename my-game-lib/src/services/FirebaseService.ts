@@ -102,7 +102,7 @@ export default class FirebaseService {
             const q = query(userRef)
             const querySnapshot = await getDocs(q);
             const gamesData = querySnapshot.docs.map<any>(doc => ({
-                id: doc.id,
+                docId: doc.id,
                 ...doc.data()
             }));
             return gamesData;
@@ -164,6 +164,21 @@ export default class FirebaseService {
             throw e;
         }
     };
+
+    public async updateGameToUserCollection(id: string | undefined, game: any) {
+        try {
+            if (!game.docId) {
+                throw new Error('docId is required to update the game.');
+            }
+            const docRef = doc(this.db, `Users/${id}/Games/${game.docId}`);
+            await updateDoc(docRef, game);
+            console.log('Game updated successfully in user collection.');
+        } catch (e) {
+            console.error('Error updating game in user collection:', e);
+            throw e;
+        };
+    }
+
 
     public async signOut() {
         try {
@@ -256,27 +271,6 @@ export default class FirebaseService {
             })
     }
 
-    // public async signInWithFacebook() {
-    //     return signInWithPopup(this.auth, this.facebookProvider)
-    //         .then((result) => {
-    //             const user = result.user;
-
-    //             const credential = FacebookAuthProvider.credentialFromResult(result);
-    //             const accessToken = credential?.accessToken;
-    //             console.log(user, credential, accessToken);
-    //         })
-    //         .catch(e => {
-    //             const errorCode = e.code;
-    //             const errorMessage1 = e.message;
-    //             // The email of the user's account used.
-    //             const email = e.customData.email;
-    //             // The AuthCredential type that was used.
-    //             const credential = FacebookAuthProvider.credentialFromError(e);
-    //             console.error(errorMessage1, email, credential);
-    //             const errorMessage = this.getFirebaseErrorMessage(e.code);
-    //             throw errorMessage;
-    //         })
-    // }
 
     public async signInWithTwitter() {
         return signInWithPopup(this.auth, this.twitterProvider)
