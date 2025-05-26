@@ -9,7 +9,7 @@ export interface Game {
     name: string;
     background_image?: string;
     metacritic?: number;
-    playtime?: number;
+    playedTime?: number;
     status?: GameStatus;
     notes?: string;
     platform?: Platform;

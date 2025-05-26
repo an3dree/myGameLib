@@ -20,6 +20,7 @@ interface CardGameListProps {
     gameStatus?: string;
     gameId?: number;
     editGame?: (gameId: number) => void;
+    playedTime?: number;
 }
 
 const getPlatformIcon = (platformName?: string) => {
@@ -69,7 +70,7 @@ const getStatusMessage = (gameStatus?: string) => {
 
 
 const CardGameList: React.FC<CardGameListProps> = ({
-    gameTitle, metaScore, genres, platform, imageUrl, platformIcon, gameStatus, editGame, gameId
+    gameTitle, metaScore, genres, platform, imageUrl, platformIcon, gameStatus, editGame, gameId, playedTime
 }) => {
 
     const imageTootip = (
@@ -90,6 +91,13 @@ const CardGameList: React.FC<CardGameListProps> = ({
                         />
                     })}
                 </div> : <></>}
+
+                {playedTime ?
+                    <div className="PlayedTime">
+                        <span>{playedTime}</span>
+                    </div> :
+                    <></>
+                }
         </>
 
     );
