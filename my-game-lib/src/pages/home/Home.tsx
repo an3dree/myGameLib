@@ -15,6 +15,7 @@ import psIcon from "../../assets/playstation.svg";
 import xboxIcon from "../../assets/xbox.svg";
 import nintendoIcon from "../../assets/nintendo-switch.svg";
 import { motion, AnimatePresence } from "framer-motion";
+import EditGameModal from '../../components/EditGameModal/EditGameModal';
 
 
 interface Props {
@@ -27,6 +28,15 @@ const platformIcons: Record<string, string> = {
     xbox: xboxIcon,
     nintendo: nintendoIcon,
 };
+
+const statuses = [
+    { id: 1, name: 'Playing', slug: 'playing' },
+    { id: 2, name: 'Plan-to-play', slug: 'toplay' },
+    { id: 3, name: 'Completed', slug: 'completed' },
+    { id: 4, name: 'On-hold', slug: 'on-hold' },
+    { id: 5, name: 'Dropped', slug: 'dropped' },
+    { id: 6, name: 'Owned', slug: 'owned' },
+];
 
 const getPlatformKey = (slug?: string) => {
     if (!slug) return '';
@@ -44,6 +54,8 @@ const Home: React.FC<Props> = ({ firebaseService }) => {
     // eslint-disable-next-line
     const [gameUser, setGameUser] = useState<GameUser>();
     const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
+    const [editModalOpen, setEditModalOpen] = useState(false);
+    const [gameToEdit, setGameToEdit] = useState<Game | null>(null);
 
     const availablePlatforms = useMemo(() => {
         const platforms = new Set<string>();
@@ -92,6 +104,23 @@ const Home: React.FC<Props> = ({ firebaseService }) => {
         return () => unsubscribe();
     }, [firebaseService, user]);
 
+    const handleEditGame = (gameId: number) => {
+        const game = games.find(g => g.id === gameId);
+        if (game) {
+            setGameToEdit(game);
+            setEditModalOpen(true);
+        }
+    };
+
+    const handleSaveGame = async (editedGame: Game) => {
+        // Atualize no Firestore (adicione um método updateGameToUserCollection no FirebaseService)
+        const userDoc = await firebaseService.getUser(user?.uid); // userId = UID do Auth
+        const userDocId = userDoc.id;
+        await firebaseService.updateGameToUserCollection(userDocId, editedGame);
+        // Atualize o estado local
+        setGames(games.map(g => g.id === editedGame.id ? editedGame : g));
+        setEditModalOpen(false);
+    };
 
     const handleLogout = () => {
         firebaseService.signOut()
@@ -153,11 +182,20 @@ const Home: React.FC<Props> = ({ firebaseService }) => {
                                     imageUrl={game.background_image}
                                     platformIcon={game.platform?.slug}
                                     gameStatus={game.status?.slug}
+                                    gameId={game.id}
+                                    editGame={handleEditGame}
                                 />
                             </motion.div>
                         ))
                     }
                 </AnimatePresence>
+                <EditGameModal
+                    open={editModalOpen}
+                    game={gameToEdit}
+                    statuses={statuses}
+                    onClose={() => setEditModalOpen(false)}
+                    onSave={handleSaveGame}
+                />
             </div>
 
             <Link to="/search" style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 999 }}>

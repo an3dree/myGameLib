@@ -20,6 +20,8 @@ interface CardGameListProps {
     platformIcon?: string;
     imageUrl?: string;
     gameStatus?: string;
+    gameId?: number;
+    editGame?: (gameId: number) => void;
 }
 
 const getPlatformIcon = (platformName?: string) => {
@@ -51,9 +53,25 @@ const getStatusIcon = (gameStatus?: string) => {
     }
 }
 
+const getStatusMessage = (gameStatus?: string) => {
+    if (gameStatus === 'playing') {
+        return <span className='GameStatus'>🟢  Playing</span>;
+    } else if (gameStatus === 'toplay') {
+        return <span className='GameStatus'>🔵  Plan-to-play</span>;
+    } else if (gameStatus === 'completed') {
+        return <span className='GameStatus'>🟣  Completed</span>;
+    } else if (gameStatus === 'on-hold') {
+        return <span className='GameStatus'>🟡  On-hold</span>;
+    } else if (gameStatus === 'dropped') {
+        return <span className='GameStatus'>🔴  Dropped</span>;
+    } else if (gameStatus === 'owned') {
+        return <span className='GameStatus'>🟤  Owned</span>;
+    }
+}
+
 
 const CardGameList: React.FC<CardGameListProps> = ({
-    gameTitle, metaScore, genres, platform, imageUrl, platformIcon, gameStatus
+    gameTitle, metaScore, genres, platform, imageUrl, platformIcon, gameStatus, editGame, gameId
 }) => {
 
     const imageTootip = (
@@ -78,7 +96,9 @@ const CardGameList: React.FC<CardGameListProps> = ({
 
     );
     return (
-        <div className="CardGameList">
+        <div className="CardGameList"
+            onClick={() => { if (gameId !== undefined && editGame) editGame(gameId); }}
+        >
 
             <Tooltip title={imageTootip} arrow placement='top'>
                 <img
@@ -101,10 +121,12 @@ const CardGameList: React.FC<CardGameListProps> = ({
 
                     </div>
                 </Tooltip>
+                <Tooltip title={gameStatus ? getStatusMessage(gameStatus) : ''} arrow placement='bottom'>
+                    <div className="GameStatusTag">
+                        {gameStatus ? getStatusIcon(gameStatus) : <></>}
+                    </div>
+                </Tooltip>
 
-                <div className="GameStatusTag">
-                    {gameStatus ? getStatusIcon(gameStatus) : <></>}
-                </div>
 
             </div>
 

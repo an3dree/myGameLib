@@ -4,6 +4,7 @@ import { Platform } from "./SearchPlatformResult";
 
 export interface Game {
     id: number;
+    docId?: string;
     slug: string;
     name: string;
     background_image?: string;
