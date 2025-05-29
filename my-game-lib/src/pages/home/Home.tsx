@@ -56,6 +56,7 @@ const Home: React.FC<Props> = ({ firebaseService }) => {
     const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [gameToEdit, setGameToEdit] = useState<Game | null>(null);
+    const [openDeleteModal, setOpenDeleteModal] = useState(false);
 
     const availablePlatforms = useMemo(() => {
         const platforms = new Set<string>();
@@ -112,6 +113,14 @@ const Home: React.FC<Props> = ({ firebaseService }) => {
         }
     };
 
+    const handleOpenDeleteModal = () => {
+        setOpenDeleteModal(true);
+    }
+
+    const handleCloseDeleteModal = () => {
+        setOpenDeleteModal(false);
+    };
+
     const handleSaveGame = async (editedGame: Game) => {
         // Atualize no Firestore (adicione um método updateGameToUserCollection no FirebaseService)
         const userDoc = await firebaseService.getUser(user?.uid); // userId = UID do Auth
@@ -121,6 +130,15 @@ const Home: React.FC<Props> = ({ firebaseService }) => {
         setGames(games.map(g => g.id === editedGame.id ? editedGame : g));
         setEditModalOpen(false);
     };
+
+    const handleDeleteGame = async (gameDocId: string) => {
+        console.log('Deleting game with docId:', gameDocId);
+        const userDoc = await firebaseService.getUser(user?.uid);
+        const userDocId = userDoc.id;
+        await firebaseService.deleteGameFromUserCollection(userDocId, gameDocId);
+        setGames(games.filter(g => g.docId !== gameDocId));
+        setEditModalOpen(false);
+    }
 
     const handleLogout = () => {
         firebaseService.signOut()
@@ -185,18 +203,24 @@ const Home: React.FC<Props> = ({ firebaseService }) => {
                                     gameId={game.id}
                                     editGame={handleEditGame}
                                     playedTime={game.playedTime}
+                                    userScore={game.userScore}
+                                    userComments={game.userComments}
                                 />
                             </motion.div>
                         ))
                     }
+                    <EditGameModal
+                        open={editModalOpen}
+                        game={gameToEdit}
+                        statuses={statuses}
+                        onClose={() => setEditModalOpen(false)}
+                        onSave={handleSaveGame}
+                        onDelete={(gameDocId: string) => handleDeleteGame(gameDocId)}
+                        onOpenDeleteModal={handleOpenDeleteModal}
+                        onCloseDeleteModal={handleCloseDeleteModal}
+                        openDeleteModal={openDeleteModal}
+                    />
                 </AnimatePresence>
-                <EditGameModal
-                    open={editModalOpen}
-                    game={gameToEdit}
-                    statuses={statuses}
-                    onClose={() => setEditModalOpen(false)}
-                    onSave={handleSaveGame}
-                />
             </div>
 
             <Link to="/search" style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 999 }}>
