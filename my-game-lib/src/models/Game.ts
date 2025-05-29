@@ -15,5 +15,6 @@ export interface Game {
     platform?: Platform;
     genres?: Genre[];
     howLongToBeat?: number;
-
+    userScore?: number;
+    userComments?: string;
 }
