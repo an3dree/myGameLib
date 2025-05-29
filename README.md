@@ -64,3 +64,5 @@ Sua biblioteca digital de games, acompanhe e gerência sua jogatina a qualquer h
 
 **Histórico de atividades** 
 - O sistema deve exibir um histórico das últimas ações do usuário (opcional para MVP).
+
+-teste preview azure

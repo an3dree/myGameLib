@@ -10,7 +10,7 @@ import {
     signOut,
     signInWithPopup, TwitterAuthProvider, FacebookAuthProvider, GoogleAuthProvider
 } from "firebase/auth";
-import { addDoc, collection, doc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
 import { getFirestore } from "firebase/firestore";
 import FirebaseCustomError from "../utils/FirebaseCustomError";
 
@@ -177,6 +177,17 @@ export default class FirebaseService {
             console.error('Error updating game in user collection:', e);
             throw e;
         };
+    }
+
+    public async deleteGameFromUserCollection(id: string | undefined, gameId: string | undefined) {
+        try {
+            const docRef = doc(this.db, `Users/${id}/Games/${gameId}`);
+            await deleteDoc(docRef);
+            console.log('Game deleted successfully from user collection.');
+        }
+        catch (e) {
+            console.error('Error updating game in user collection:', e);
+        }
     }
 
 

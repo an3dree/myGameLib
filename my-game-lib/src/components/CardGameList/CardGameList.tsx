@@ -1,6 +1,5 @@
 import * as React from 'react';
 import './CardGameList.css';
-import PlatformTag from '../PlatformTag/PlatformTag';
 import metacriticIcon from '../../assets/metacritic.svg';
 import pcIcon from '../../assets/steam.svg';
 import psIcon from '../../assets/playstation.svg';
@@ -9,7 +8,6 @@ import nintendoIcon from '../../assets/nintendo-switch.svg';
 import GenreTag from '../GenreTag/GenreTag';
 import { Genre } from '../../models/SearchGenreResult';
 import { Platform } from '../../models/SearchPlatformResult';
-import handlePlatformBoxColor from '../../utils/PlatformHelper';
 import { Tooltip } from '@mui/material';
 
 interface CardGameListProps {
@@ -23,6 +21,8 @@ interface CardGameListProps {
     gameId?: number;
     editGame?: (gameId: number) => void;
     playedTime?: number;
+    userScore?: number;
+    userComments?: string;
 }
 
 const getPlatformIcon = (platformName?: string) => {
@@ -72,7 +72,18 @@ const getStatusMessage = (gameStatus?: string) => {
 
 
 const CardGameList: React.FC<CardGameListProps> = ({
-    gameTitle, metaScore, genres, platform, imageUrl, platformIcon, gameStatus, editGame, gameId, playedTime
+    gameTitle,
+    metaScore,
+    genres,
+    platform,
+    imageUrl,
+    platformIcon,
+    gameStatus,
+    editGame,
+    gameId,
+    playedTime,
+    userScore,
+    userComments
 }) => {
 
     const imageTootip = (
@@ -82,6 +93,8 @@ const CardGameList: React.FC<CardGameListProps> = ({
             <div className='Metacritic'>
                 <img width='15px' height='15px' src={metacriticIcon} alt="Metacrit Icon" />
                 <strong>{metaScore}</strong>
+                {playedTime && <span> - {playedTime}h</span>}
+                {userScore && <span> - User Score: {userScore}</span>}
             </div>
 
             {genres ?
@@ -94,12 +107,12 @@ const CardGameList: React.FC<CardGameListProps> = ({
                     })}
                 </div> : <></>}
 
-                {playedTime ?
-                    <div className="PlayedTime">
-                        <span>{playedTime}</span>
-                    </div> :
-                    <></>
-                }
+            {playedTime ?
+                <div className="PlayedTime">
+                    <span>{playedTime}</span>
+                </div> :
+                <></>
+            }
         </>
 
     );
