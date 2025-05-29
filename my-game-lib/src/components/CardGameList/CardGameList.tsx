@@ -21,6 +21,8 @@ interface CardGameListProps {
     gameId?: number;
     editGame?: (gameId: number) => void;
     playedTime?: number;
+    userScore?: number;
+    userComments?: string;
 }
 
 const getPlatformIcon = (platformName?: string) => {
@@ -70,7 +72,18 @@ const getStatusMessage = (gameStatus?: string) => {
 
 
 const CardGameList: React.FC<CardGameListProps> = ({
-    gameTitle, metaScore, genres, platform, imageUrl, platformIcon, gameStatus, editGame, gameId, playedTime
+    gameTitle,
+    metaScore,
+    genres,
+    platform,
+    imageUrl,
+    platformIcon,
+    gameStatus,
+    editGame,
+    gameId,
+    playedTime,
+    userScore,
+    userComments
 }) => {
 
     const imageTootip = (
@@ -80,6 +93,8 @@ const CardGameList: React.FC<CardGameListProps> = ({
             <div className='Metacritic'>
                 <img width='15px' height='15px' src={metacriticIcon} alt="Metacrit Icon" />
                 <strong>{metaScore}</strong>
+                {playedTime && <span> - {playedTime}h</span>}
+                {userScore && <span> - User Score: {userScore}</span>}
             </div>
 
             {genres ?
@@ -92,12 +107,12 @@ const CardGameList: React.FC<CardGameListProps> = ({
                     })}
                 </div> : <></>}
 
-                {playedTime ?
-                    <div className="PlayedTime">
-                        <span>{playedTime}</span>
-                    </div> :
-                    <></>
-                }
+            {playedTime ?
+                <div className="PlayedTime">
+                    <span>{playedTime}</span>
+                </div> :
+                <></>
+            }
         </>
 
     );
